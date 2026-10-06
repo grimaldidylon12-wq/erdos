@@ -1,0 +1,300 @@
+- number: '1'
+  prize: $500
+  informal_status:
+    state: disproved
+    last_update: '2025-08-31'
+  formal_status:
+    state: Lean
+    last_update: '2026-09-03'
+  status:
+    state: disproved (Lean)
+    last_update: '2026-09-03'
+  oeis:
+  - A276661
+  formalized:
+    state: 'yes'
+    last_update: '2025-08-31'
+  tags:
+  - number theory
+  - additive combinatorics
+- number: '2'
+  prize: $1000
+  informal_status:
+    state: disproved
+    last_update: '2025-08-31'
+  formal_status:
+    state: Lean
+    last_update: '2026-08-24'
+  status:
+    state: disproved (Lean)
+    last_update: '2026-08-24'
+  formalized:
+    state: 'yes'
+    last_update: '2026-08-26'
+  oeis:
+  - A160559
+  tags:
+  - number theory
+  - covering systems
+- number: '3'
+  prize: $5000
+  informal_status:
+    state: open
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: open
+    last_update: '2025-08-31'
+  oeis:
+  - A003002
+  - A003003
+  - A003004
+  - A003005
+  formalized:
+    state: 'yes'
+    last_update: '2025-08-31'
+  tags:
+  - number theory
+  - additive combinatorics
+  - arithmetic progressions
+- number: '7'
+  prize: 'no'
+  informal_status:
+    state: verifiable
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: verifiable
+    last_update: '2025-08-31'
+  oeis:
+  - N/A
+  formalized:
+    state: 'yes'
+    last_update: '2026-04-20'
+  tags:
+  - number theory
+  - covering systems
+- number: '19'
+  prize: $500
+  informal_status:
+    state: decidable
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: decidable
+    last_update: '2025-08-31'
+  oeis:
+  - N/A
+  formalized:
+    state: 'yes'
+    last_update: '2026-09-27'
+  tags:
+  - graph theory
+  - chromatic number
+- number: '23'
+  prize: 'no'
+  informal_status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  oeis:
+  - A389646
+  formalized:
+    state: 'yes'
+    last_update: '2026-02-17'
+  tags:
+  - graph theory
+- number: '242'
+  prize: 'no'
+  informal_status:
+    state: falsifiable
+    last_update: '2025-09-28'
+  formal_status:
+    state: unformalized
+  status:
+    state: falsifiable
+    last_update: '2025-09-28'
+  oeis:
+  - A073101
+  - A075245
+  - A075246
+  - A075247
+  - A075248
+  - A287116
+  formalized:
+    state: 'yes'
+    last_update: '2025-08-31'
+  comments: Erdős-Straus conjecture
+  tags:
+  - number theory
+  - unit fractions
+- number: '364'
+  prize: 'no'
+  informal_status:
+    state: verifiable
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: verifiable
+    last_update: '2025-08-31'
+  oeis:
+  - A060355
+  - A076445
+  formalized:
+    state: 'yes'
+    last_update: '2025-08-31'
+  tags:
+  - number theory
+  - powerful
+- number: '375'
+  prize: 'no'
+  informal_status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  oeis:
+  - N/A
+  formalized:
+    state: 'yes'
+    last_update: '2026-01-18'
+  tags:
+  - number theory
+  - primes
+- number: '458'
+  prize: 'no'
+  informal_status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  oeis:
+  - A056604
+  formalized:
+    state: 'yes'
+    last_update: '2025-11-21'
+  tags:
+  - number theory
+  - primes
+- number: '647'
+  prize: £25
+  informal_status:
+    state: verifiable
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: verifiable
+    last_update: '2025-08-31'
+  oeis:
+  - A062249
+  - A087280
+  formalized:
+    state: 'yes'
+    last_update: '2025-10-13'
+  tags:
+  - number theory
+- number: '699'
+  prize: 'no'
+  informal_status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  oeis:
+  - N/A
+  formalized:
+    state: 'yes'
+    last_update: '2026-01-04'
+  tags:
+  - number theory
+  - binomial coefficients
+- number: '779'
+  prize: 'no'
+  informal_status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  formal_status:
+    state: unformalized
+  status:
+    state: falsifiable
+    last_update: '2025-08-31'
+  oeis:
+  - A005235
+  formalized:
+    state: 'yes'
+    last_update: '2025-08-31'
+  tags:
+  - number theory
+  - primes
+- number: '848'
+  prize: 'no'
+  informal_status:
+    state: decidable
+    last_update: '2025-10-19'
+  formal_status:
+    state: unformalized
+  status:
+    state: decidable
+    last_update: '2025-10-19'
+  oeis:
+  - N/A
+  formalized:
+    state: 'yes'
+    last_update: '2026-02-01'
+  tags:
+  - number theory
+- number: '993'
+  prize: 'no'
+  informal_status:
+    state: falsifiable
+    last_update: '2025-09-07'
+  formal_status:
+    state: unformalized
+  status:
+    state: falsifiable
+    last_update: '2025-09-07'
+  formalized:
+    state: 'no'
+    last_update: '2025-09-07'
+  oeis:
+  - A000055
+  - possible
+  tags:
+  - graph theory
+- number: '1000'
+  prize: 'no'
+  informal_status:
+    state: proved
+    last_update: '2025-12-27'
+  formal_status:
+    state: Lean
+    last_update: '2025-12-27'
+  status:
+    state: proved (Lean)
+    last_update: '2025-12-27'
+  formalized:
+    state: 'yes'
+    last_update: '2026-08-04'
+  oeis:
+  - N/A
+  tags:
+  - number theory
+  - diophantine approximation

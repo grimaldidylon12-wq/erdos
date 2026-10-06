@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "erdos-engine"
+version = "0.1.0"
+description = "Certificate-producing computational attacks on open Erdős problems, with novelty checks and publication tooling"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = ["pyyaml>=6", "requests>=2"]
+
+[project.optional-dependencies]
+fast = ["gmpy2>=2.1"]
+test = ["pytest>=7", "hypothesis>=6"]
+
+[project.scripts]
+erdos-engine = "erdos_engine.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+erdos_engine = ["native/*.c", "data/*", "publish/templates/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "slow: long-running tests (deselect with -m 'not slow')",
+  "network: tests that need internet access",
+]
+addopts = "-m 'not network'"
