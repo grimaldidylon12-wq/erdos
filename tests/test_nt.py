@@ -115,3 +115,9 @@ def test_fnv_vector():
     for _ in range(8):
         ref = ((ref ^ 0) * nt.FNV_PRIME) % 2**64
     assert h == ref
+
+
+def test_prime_pi():
+    assert [nt.prime_pi(n) for n in (0, 1, 2, 10, 100, 10**6)] == [0, 0, 1, 4, 25, 78498]
+    assert nt.prime_pi(10**9) == 50847534
+    assert all(nt.prime_pi(n) == sum(1 for p in SIEVE if p <= n) for n in range(0, 3000, 7))

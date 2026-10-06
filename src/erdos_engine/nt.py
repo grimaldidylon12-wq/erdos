@@ -161,3 +161,24 @@ def fnv_u64(h: int, v: int) -> int:
         h ^= (v >> (8 * i)) & 0xFF
         h = (h * FNV_PRIME) & _M64
     return h
+
+
+def prime_pi(n: int) -> int:
+    """pi(n) by the Lucy_Hedgehog / Legendre-type recursion, O(n^(3/4)).
+
+    Shares nothing with sieving, so it independently confirms how many primes
+    a sieve-driven computation must have visited."""
+    if n < 2:
+        return 0
+    r = math.isqrt(n)
+    V = [n // i for i in range(1, r + 1)]
+    V += list(range(V[-1] - 1, 0, -1))
+    S = {v: v - 1 for v in V}
+    for p in range(2, r + 1):
+        if S[p] > S[p - 1]:
+            sp, p2 = S[p - 1], p * p
+            for v in V:
+                if v < p2:
+                    break
+                S[v] -= S[v // p] - sp
+    return S[n]

@@ -380,6 +380,12 @@ class Problem458(Solver):
             return rep.fail("a chunk reports a missing witness")
         n_primes = sum(ch["count"] for ch in chunks)
         rep.note(f"(B) {len(chunks)} chunks tile [2, {qmax}] with {n_primes} primes, no failures reported")
+        if qmax <= 2 * 10**11:
+            pi = nt.prime_pi(qmax)
+            if pi != n_primes:
+                return rep.fail(f"witness count {n_primes} != pi({qmax}) = {pi}")
+            rep.note(f"(B) witness count equals pi({qmax}) = {pi}, computed by the Lucy_Hedgehog "
+                     "recursion (no sieve): every prime q <= sqrt(X) has a witness")
         rng = random.Random(seed)
         picks = [0] + rng.sample(range(1, len(chunks)), min(sample_chunks, len(chunks) - 1)) if len(chunks) > 1 else [0]
         # always include the last chunk too (largest q, where witnesses are biggest)

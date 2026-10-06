@@ -217,3 +217,10 @@ def test_agrees_with_independent_forum_computation():
     assert len(hp) == 341805
     close = [(a, b) for (a, _, _), (b, _, _) in zip(hp, hp[1:]) if b - a <= 1854]
     assert close[-1] == (389017, 390625) and all(b < 10**6 for _, b in close)
+
+
+def test_tamper_count_caught_by_prime_pi(run_1e12):
+    def f(c):
+        c["squares"]["chunks"][-1]["count"] += 1
+    rep = Problem458().check(_tampered(run_1e12, f), sample_chunks=0)
+    assert not rep.ok and "pi(" in rep.details[-1]
