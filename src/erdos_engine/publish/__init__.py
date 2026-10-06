@@ -100,6 +100,19 @@ def bib_keys(text: str) -> set[str]:
     return set(re.findall(r"@\w+\{([^,]+),", text))
 
 
+def summarize_details(details: list[str]) -> list[str]:
+    """Collapse per-chunk 'reproduced exactly' lines into one summary line."""
+    rx = re.compile(r"chunk \[(\d+), (\d+)\) reproduced exactly: (\d+) witnesses")
+    hits = [rx.search(d) for d in details]
+    rest = [d for d, h in zip(details, hits) if not h]
+    hits = [h for h in hits if h]
+    if hits:
+        total = sum(int(h.group(3)) for h in hits)
+        rest.append(f"{len(hits)} chunks (including the first and the last, the others chosen at random) "
+                    f"recomputed from scratch and reproduced exactly: {total:,} witnesses in total")
+    return rest
+
+
 def venue_recommendation(result: Result, novelty: Novelty | None) -> str:
     if result.outcome in (COUNTEREXAMPLE, EXAMPLE):
         return ("SETTLES THE PROBLEM (if correct). Do not post publicly before an independent human "
@@ -178,8 +191,8 @@ implementation (``@@checker@@'') that shares no code with the search:
 @@check_items@@
 \end{itemize}
 The raw certificate (\texttt{result.json}, SHA-256
-\texttt{@@sha_result@@}) and the check report are deposited with the
-software. % TODO(human): add repository URL and Zenodo DOI.
+\texttt{@@sha_result@@}) and the check report are deposited
+with the software. % TODO(human): add repository URL and Zenodo DOI.
 
 \section*{Use of AI tools}
 @@ai@@
@@ -218,12 +231,20 @@ def build_paper(result: Result, check: CheckReport, authors: list[Author], dossi
         + (f"\n\\email{{{tex_escape(a.email)}}}" if a.email else "") for a in authors)
     if any(a is PLACEHOLDER_AUTHOR or "fill in" in a.name for a in authors):
         warnings.append("author block contains placeholders")
-    if dossier and dossier.frontier:
+    if novelty and novelty.prior_value is not None and dossier:
+        # the novelty record carries any human override of the extracted claim
+        prior = (f"The forum thread for the problem contains {len(dossier.comments)} comments. "
+                 f"The largest verification bound reported there is "
+                 f"${_tex_sci(novelty.prior_value)}$ ({tex_escape(novelty.prior_source)}). ")
+    elif dossier and dossier.frontier:
         f = dossier.frontier
         prior = (f"The forum thread for the problem contains {len(dossier.comments)} comments. "
                  f"The largest verification bound we found reported there is approximately "
                  f"${_tex_sci(f.value)}$ (comment by {tex_escape(f.author or 'an anonymous user')}, "
                  f"{tex_escape(f.when)}). ")
+    else:
+        prior = ""
+    if prior:
         if novelty and novelty.verdict == "new-frontier":
             prior += "The present computation goes beyond that bound."
         elif novelty and novelty.verdict == "replication":
@@ -236,14 +257,14 @@ def build_paper(result: Result, check: CheckReport, authors: list[Author], dossi
     tagmsc = sorted({_MSC.get(t, "11Y99") for t in solver.tags}) or ["11Y99"]
     abstract = (solver.abstract_tex(result) +
                 " Every claim is backed by a certificate that was re-validated by an independent implementation.")
-    items = "\n".join(f"\\item {tex_escape(d)}" for d in check.details) or "\\item (no details recorded)"
+    items = "\n".join(f"\\item {tex_escape(d)}" for d in summarize_details(check.details)) or "\\item (no details recorded)"
     tex = fill(PAPER_TEX, version=__version__, today=today, title=title, authors=auth,
                msc=", ".join(tagmsc[:1]) + (f" (secondary {', '.join(tagmsc[1:])})" if len(tagmsc) > 1 else ""),
                abstract=abstract, n=n, statement=solver.statement_tex, status=status,
                status_gloss=_STATUS_GLOSS.get(status, ""), prior=prior,
                method=solver.method_tex(result) or "TODO(human): describe the method.",
                results=solver.results_tex(result), checker=tex_escape(check.checker),
-               check_items=items, sha_result=sha_result, ai=AI_DISCLOSURE)
+               check_items=items, sha_result=" ".join(sha_result[i:i + 16] for i in range(0, len(sha_result), 16)), ai=AI_DISCLOSURE)
     base = (TEMPLATES / "refs.bib").read_text()
     bib = base + "\n" + site_bib_entry(n, today)
     have = bib_keys(bib)
@@ -304,7 +325,7 @@ def forum_comment(result: Result, check: CheckReport, novelty: Novelty | None) -
     lines.append("")
     lines.append(f"Checking: an independent implementation sharing no code with the search ({check.checker}) "
                  "re-validated the certificate:")
-    for d in check.details[:6]:
+    for d in summarize_details(check.details):
         lines.append(f"- {d}")
     lines.append("")
     lines.append("Code, certificate and logs: <REPOSITORY URL> (DOI: <ZENODO DOI>).")

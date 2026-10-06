@@ -536,6 +536,12 @@ in $@@nchunks@@$ chunks; $@@generic@@$ of them needed the Miller--Rabin fallback
 rather than a Pocklington certificate. The square scan used about
 $@@cpu@@$ CPU-hours. The literal lcm inequality was additionally checked
 directly for $p_{k+1}\le @@brute@@$.
+Limitation: the independent re-implementation recomputed part (A) in full
+but part (B) only for a random sample of chunks together with the first
+and last (Section~4); the coverage of (B) is confirmed by comparing the
+number of witnesses with $\pi(\lfloor\sqrt X\rfloor)$ computed by a
+sieve-free method, while correctness of the witnesses outside the sample
+rests on the C implementation and its per-witness primality proofs.
 
 The gaps with the largest ratio $\Pi(p,r)/p$ are all small:
 \begin{center}

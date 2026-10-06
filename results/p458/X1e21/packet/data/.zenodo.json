@@ -1,0 +1,27 @@
+{
+ "title": "Certificate and software for a computation on Erd\u0151s Problem #458",
+ "upload_type": "dataset",
+ "description": "The inequality holds for every k with p_(k+1) <= 1.000e+21; 683532 prime powers with exponent >= 3 located, 1367199811 square witnesses exhibited.",
+ "creators": [
+  {
+   "name": "AUTHOR NAME (fill in)",
+   "affiliation": "Affiliation (fill in)"
+  }
+ ],
+ "license": "cc-by-4.0",
+ "keywords": [
+  "Erd\u0151s problems",
+  "Erd\u0151s problem 458",
+  "computational number theory",
+  "certificate"
+ ],
+ "related_identifiers": [
+  {
+   "identifier": "https://www.erdosproblems.com/458",
+   "relation": "isSupplementTo",
+   "scheme": "url"
+  }
+ ],
+ "publication_date": "2026-10-06",
+ "version": "0.1.0"
+}

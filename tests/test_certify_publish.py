@@ -161,3 +161,18 @@ def test_cli_check_detects_tampering(tmp_path, capsys):
     main(["run", "647", "N=1000", "--out", str(out)])
     (out / "check.json").write_text("{}")
     assert main(["check", str(out)]) == 3
+
+
+def test_prior_override_reaches_paper(run458, tmp_path, catalog):
+    r, _ = certify.load_run(run458)
+    d = build_dossier(458, catalog)
+    nv = assess_novelty(1e21, False, d, prior_override=1e20, prior_note="read by a human")
+    build_packet(run458, tmp_path / "pk", None, d, nv, compile=False)
+    tex = (tmp_path / "pk/paper/main.tex").read_text()
+    assert "$10^{20}$ (read by a human)" in tex and "1.05" not in tex.split("Prior work")[1].split("\\section")[0]
+
+
+def test_summarize_details():
+    d = ["a", "chunk [2, 10) reproduced exactly: 4 witnesses", "chunk [10, 20) reproduced exactly: 3 witnesses"]
+    out = publish.summarize_details(d)
+    assert out[0] == "a" and "2 chunks" in out[1] and "7 witnesses" in out[1]
