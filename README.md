@@ -37,8 +37,21 @@ statement for all `p_{k+1} ≤ 10^21` **without using any prime-gap table**:
   deterministic Miller–Rabin below ψ₁₃ as the fallback.
 - **(C)** The remaining gaps follow trivially.
 
-See `results/p458/` for the run, certificate and check report, and `results/p458/packet/`
-for the generated paper and the publication checklist. The run used about 7 CPU-hours.
+Run figures:
+
+- (A) 683,532 prime powers with `a ≥ 3`, in 683,531 distinct gaps. Exactly one gap, `(2179, 2203)`,
+  holds two of them. The worst ratio is still the gap `(7, 11)` with product 6.
+- (B) 1,367,199,811 witnesses, one for each prime `q ≤ 31,622,776,601`. 99.72% are
+  Pocklington-certified and the rest use deterministic Miller–Rabin. The scan took 6.2
+  CPU-hours on 3 cores.
+- The independent checker recomputed (A) in full and reproduced 25 random chunks of (B) bit for bit.
+  The witness count equals π(31,622,776,601) = 1,367,199,811, computed by a sieve-free
+  prime-counting algorithm.
+- Cross-check against an independent forum computation: the engine finds exactly the 341,805
+  prime powers with `a ≥ 3` below `1.05·10^20` reported there.
+
+The run, certificate and check report are in `results/p458/X1e21/`. The generated paper,
+forum draft and publication checklist are in `results/p458/X1e21/packet/`.
 
 ## Solvers
 
