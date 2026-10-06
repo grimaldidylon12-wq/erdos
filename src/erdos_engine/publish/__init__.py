@@ -298,15 +298,13 @@ def forum_comment(result: Result, check: CheckReport, novelty: Novelty | None) -
     solver = get_solver(result.problem)
     lines = []
     if novelty and novelty.verdict == "replication":
-        lines.append("Independent replication (no new frontier): " + result.summary)
-    else:
-        lines.append(result.summary)
+        lines.append("(Independent replication; this does not extend the existing frontier.)")
+        lines.append("")
+    lines.append(solver.forum_markdown(result))
     lines.append("")
-    lines.append("Method: " + _md(solver.method_tex(result))[:1500].strip())
-    lines.append("")
-    lines.append("Verification: the certificate was re-checked by an independent implementation "
-                 f"({check.checker}):")
-    for d in check.details[:8]:
+    lines.append(f"Checking: an independent implementation sharing no code with the search ({check.checker}) "
+                 "re-validated the certificate:")
+    for d in check.details[:6]:
         lines.append(f"- {d}")
     lines.append("")
     lines.append("Code, certificate and logs: <REPOSITORY URL> (DOI: <ZENODO DOI>).")

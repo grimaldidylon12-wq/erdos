@@ -194,3 +194,26 @@ def test_latex_fragments(run_1e12):
     assert "10^{12}" in s.abstract_tex(run_1e12)
     assert "@@" not in s.results_tex(run_1e12)
     assert p458._tex_num(3 * 10**21) == "3\\cdot 10^{21}"
+
+
+def test_parallel_check(run_1e12):
+    rep = Problem458().check(run_1e12, sample_chunks=3, workers=2, recompute_high=False)
+    assert rep.ok and sum("reproduced exactly" in d for d in rep.details) >= 3
+
+
+def test_forum_markdown_mentions_prior_only_when_beyond(run_1e12):
+    s = Problem458()
+    assert "10^{20}" not in s.forum_markdown(run_1e12)
+    big = copy.deepcopy(run_1e12)
+    big.certificate["X"] = 10**21
+    assert "10^{20}" in s.forum_markdown(big)
+
+
+def test_agrees_with_independent_forum_computation():
+    """bhowerton (forum, 12 Jun 2026): 341805 prime powers q^a, a >= 3, below 1.05e20,
+    and the only two within 1854 of each other (beyond the small range checked directly)
+    are 73^3 = 389017 and 5^8 = 390625."""
+    hp = p458.higher_powers(105 * 10**18)
+    assert len(hp) == 341805
+    close = [(a, b) for (a, _, _), (b, _, _) in zip(hp, hp[1:]) if b - a <= 1854]
+    assert close[-1] == (389017, 390625) and all(b < 10**6 for _, b in close)

@@ -95,6 +95,10 @@ class Solver:
         """LaTeX describing the outcome."""
         return _tex_escape(result.summary)
 
+    def forum_markdown(self, result: Result) -> str:
+        """Concise markdown (with $...$ maths) for an erdosproblems.com comment."""
+        return result.summary
+
     def abstract_tex(self, result: Result) -> str:
         """One or two sentences of LaTeX for the abstract."""
         return _tex_escape(result.summary)

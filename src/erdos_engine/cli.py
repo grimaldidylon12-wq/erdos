@@ -135,7 +135,8 @@ def cmd_check(a) -> int:
     solver = get_solver(res.problem)
     kw = {}
     if a.thorough and res.problem == 458:
-        kw = {"sample_chunks": 24}
+        import os
+        kw = {"sample_chunks": 24, "workers": os.cpu_count() or 1}
     rep = solver.check(res, **kw)
     print("PASSED" if rep.ok else "FAILED")
     for d in rep.details:

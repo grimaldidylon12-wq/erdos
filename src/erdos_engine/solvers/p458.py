@@ -335,7 +335,8 @@ class Problem458(Solver):
 
     # ------------------------------------------------------------------
     def check(self, result: Result, sample_chunks: int = 4, seed: int = 0,
-              recompute_high: bool = True, time_budget: float | None = None) -> CheckReport:
+              recompute_high: bool = True, time_budget: float | None = None,
+              workers: int = 1) -> CheckReport:
         rep = CheckReport(True, "p458-independent-python")
         t0 = time.perf_counter()
         c = result.certificate
@@ -381,12 +382,21 @@ class Problem458(Solver):
         rep.note(f"(B) {len(chunks)} chunks tile [2, {qmax}] with {n_primes} primes, no failures reported")
         rng = random.Random(seed)
         picks = [0] + rng.sample(range(1, len(chunks)), min(sample_chunks, len(chunks) - 1)) if len(chunks) > 1 else [0]
+        # always include the last chunk too (largest q, where witnesses are biggest)
+        if len(chunks) > 1 and len(chunks) - 1 not in picks and sample_chunks > 0:
+            picks.append(len(chunks) - 1)
+        if workers > 1 and len(picks) > 1:
+            with ProcessPoolExecutor(max_workers=workers) as ex:
+                futs = {ex.submit(scan_chunk_py, chunks[i]["lo"], chunks[i]["hi"]): i for i in picks}
+                recomputed = {futs[f]: f.result() for f in as_completed(futs)}
+        else:
+            recomputed = {}
         for i in picks:
             if time_budget and time.perf_counter() - t0 > time_budget:
                 rep.note("time budget exhausted; remaining samples skipped")
                 break
             ch = chunks[i]
-            s = scan_chunk_py(ch["lo"], ch["hi"])
+            s = recomputed.get(i) or scan_chunk_py(ch["lo"], ch["hi"])
             if (s["count"], s["digest"], s["fails"]) != (ch["count"], ch["digest"], 0):
                 return rep.fail(f"chunk {ch['lo']}..{ch['hi']} not reproduced "
                                 f"(py count={s['count']} digest={s['digest']}, cert {ch['count']} {ch['digest']})")
@@ -398,6 +408,32 @@ class Problem458(Solver):
     def method_tex(self, result: Result) -> str:
         c = result.certificate
         return METHOD_TEX
+
+    def forum_markdown(self, result: Result) -> str:
+        c = result.certificate
+        hp = c["high_powers"]
+        st = result.stats
+        X = _tex_num(c["X"])
+        return (
+            f"I have verified that the inequality holds for every $k$ with $p_{{k+1}} \\le {X}$, by a "
+            "certificate that does not use any table of maximal prime gaps. With "
+            "$\\Pi(p,r)=\\prod_{q^a\\in(p,r),\\,a\\ge2} q$ the statement for the gap $(p_k,p_{k+1})$ is "
+            "$\\Pi(p_k,p_{k+1})<p_k$, and the certificate has three parts:\n\n"
+            f"1. **Higher powers.** All {hp['prime_powers']:,} prime powers $q^a\\le {X}$ with $a\\ge3$ were "
+            f"placed in their exact prime gaps ({hp['gaps']:,} gaps), every prime power inside each such gap "
+            "(squares included) was listed, and $\\Pi<p_k$ was checked. The worst ratio is still the gap "
+            "$(7,11)$ with $\\Pi=6$.\n"
+            f"2. **Squares.** For every pair of consecutive primes $q<q'$ with $q\\le {c['squares']['qmax']:,}$ "
+            f"a prime was exhibited in $(q^2,q'^2)$ ({st.get('square_witnesses', 0):,} witnesses), so no gap "
+            "contains two prime squares. Witnesses have the form $N=Pm+1$ with $P$ a prime just below $q$ "
+            "and $2P>\\sqrt N$, so each is proved prime by a Pocklington certificate (deterministic "
+            "13-base Miller-Rabin, valid below $3.3\\cdot 10^{24}$, as fallback).\n"
+            "3. **Everything else.** Any other gap holds at most one prime square $q^2$, so "
+            "$\\Pi\\le q<p_k$."
+            + ("\n\nCompared with the $10^{20}$ verification above, this extends the range and does not "
+               "depend on the (unrefereed) distributed prime gap search above $4\\cdot10^{18}$."
+               if c["X"] > 10**20 else "")
+        )
 
     def abstract_tex(self, result: Result) -> str:
         c = result.certificate
