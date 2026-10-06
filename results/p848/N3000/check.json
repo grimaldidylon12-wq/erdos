@@ -1,0 +1,9 @@
+{
+ "checker": "p848-bron-kerbosch",
+ "details": [
+  "3000 witness sets re-validated by trial division",
+  "optimality re-derived by Bron-Kerbosch for N <= 120"
+ ],
+ "ok": true,
+ "seconds": 30.935598300000038
+}

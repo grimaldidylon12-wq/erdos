@@ -1,0 +1,126 @@
+{
+ "certificate": {
+  "N": 17,
+  "counts_match_A000055": true,
+  "failures": [],
+  "non_log_concave": [],
+  "per_n": [
+   {
+    "n": 1,
+    "non_unimodal": 0,
+    "oeis_A000055": 1,
+    "trees": 1
+   },
+   {
+    "n": 2,
+    "non_unimodal": 0,
+    "oeis_A000055": 1,
+    "trees": 1
+   },
+   {
+    "n": 3,
+    "non_unimodal": 0,
+    "oeis_A000055": 1,
+    "trees": 1
+   },
+   {
+    "n": 4,
+    "non_unimodal": 0,
+    "oeis_A000055": 2,
+    "trees": 2
+   },
+   {
+    "n": 5,
+    "non_unimodal": 0,
+    "oeis_A000055": 3,
+    "trees": 3
+   },
+   {
+    "n": 6,
+    "non_unimodal": 0,
+    "oeis_A000055": 6,
+    "trees": 6
+   },
+   {
+    "n": 7,
+    "non_unimodal": 0,
+    "oeis_A000055": 11,
+    "trees": 11
+   },
+   {
+    "n": 8,
+    "non_unimodal": 0,
+    "oeis_A000055": 23,
+    "trees": 23
+   },
+   {
+    "n": 9,
+    "non_unimodal": 0,
+    "oeis_A000055": 47,
+    "trees": 47
+   },
+   {
+    "n": 10,
+    "non_unimodal": 0,
+    "oeis_A000055": 106,
+    "trees": 106
+   },
+   {
+    "n": 11,
+    "non_unimodal": 0,
+    "oeis_A000055": 235,
+    "trees": 235
+   },
+   {
+    "n": 12,
+    "non_unimodal": 0,
+    "oeis_A000055": 551,
+    "trees": 551
+   },
+   {
+    "n": 13,
+    "non_unimodal": 0,
+    "oeis_A000055": 1301,
+    "trees": 1301
+   },
+   {
+    "n": 14,
+    "non_unimodal": 0,
+    "oeis_A000055": 3159,
+    "trees": 3159
+   },
+   {
+    "n": 15,
+    "non_unimodal": 0,
+    "oeis_A000055": 7741,
+    "trees": 7741
+   },
+   {
+    "n": 16,
+    "non_unimodal": 0,
+    "oeis_A000055": 19320,
+    "trees": 19320
+   },
+   {
+    "n": 17,
+    "non_unimodal": 0,
+    "oeis_A000055": 48629,
+    "trees": 48629
+   }
+  ]
+ },
+ "created": "2026-10-06T12:39:44+00:00",
+ "engine_version": "0.1.0",
+ "frontier": 17.0,
+ "host": "Linux x86_64 py3.13.16",
+ "outcome": "verified_to_bound",
+ "params": {
+  "N": 17
+ },
+ "problem": 993,
+ "solver": "p993-tree-unimodality",
+ "stats": {
+  "seconds": 30.5
+ },
+ "summary": "All 81137 trees with at most 17 vertices have unimodal independence sequences (0 are not log-concave); tree counts match A000055: True."
+}
