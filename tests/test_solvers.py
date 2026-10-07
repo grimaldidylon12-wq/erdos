@@ -170,3 +170,11 @@ def test_p375_tamper_assignment():
     k = next(iter(h["assign"]))
     h["assign"][k] = 4  # not prime
     assert not s.check(r).ok
+
+
+def test_p848_growth_requires_witness():
+    s = get_solver(848)
+    r = s.run(N=100)
+    first_growth = min(int(k) for k in r.certificate["witnesses"])
+    del r.certificate["witnesses"][str(first_growth)]
+    assert not s.check(r).ok

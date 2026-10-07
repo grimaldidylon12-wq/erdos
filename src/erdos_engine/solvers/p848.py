@@ -14,6 +14,7 @@ algorithm (Bron--Kerbosch with pivoting, tracking the maximum).
 """
 from __future__ import annotations
 
+import math
 import time
 
 from .. import nt
@@ -30,6 +31,16 @@ def squarefree_sieve(M: int) -> bytearray:
 
 def is_squarefree_td(n: int) -> bool:
     return all(e == 1 for e in nt.factorize(n).values())
+
+
+def has_square_factor(m: int, primes: list[int] | None = None) -> bool:
+    """True iff p^2 | m for some prime p (direct division; independent of the sieve)."""
+    for p in primes if primes is not None else nt.primes_upto(math.isqrt(m)):
+        if p * p > m:
+            break
+        if m % (p * p) == 0:
+            return True
+    return False
 
 
 def build_graph(N: int):
@@ -130,6 +141,7 @@ class Problem848(Solver):
         with Timer() as t:
             verts, nbr = build_graph(N)
             prev = 0
+            last: list[int] = []
             for n in range(1, N + 1, step):
                 k = sum(1 for a in verts if a <= n)
                 sub = nbr[:k]
@@ -137,15 +149,16 @@ class Problem848(Solver):
                 sub = [x & mask_all for x in sub]
                 cl = max_clique(sub, lower=prev) if k else 0
                 size = bin(cl).count("1")
-                if size < prev:  # monotone: the previous optimum is still feasible
+                if size <= prev:  # monotone: the previous optimum is still optimal
                     size = prev
-                else:
-                    witnesses[n] = [verts[i] for i in range(k) if (cl >> i) & 1]
+                else:  # store a witness only where the maximum grows
+                    last = [verts[i] for i in range(k) if (cl >> i) & 1]
+                    witnesses[n] = last
                 prev = size
                 c7 = class_size(n)
                 seq.append([n, size, c7])
                 if size > c7:
-                    exceptions.append([n, size, c7, witnesses.get(n)])
+                    exceptions.append([n, size, c7, last])
         cert = {"N": N, "sequence": seq, "exceptions": exceptions,
                 "witnesses": {str(k): v for k, v in witnesses.items()}, "vertices": len(verts)}
         summ = (f"Computed f(N) for N <= {N}. " +
@@ -159,15 +172,29 @@ class Problem848(Solver):
         t0 = time.perf_counter()
         c = result.certificate
         seq = {n: f for n, f, _ in c["sequence"]}
+        products: set[int] = set()
         for n_s, A in c["witnesses"].items():
             n = int(n_s)
-            if len(A) != seq[n] or any(a > n for a in A):
+            if len(A) != seq[n] or len(set(A)) != len(A) or any(not 1 <= a <= n for a in A):
                 return rep.fail(f"witness for N={n} has wrong size or range")
-            for i, a in enumerate(A):
-                for b in A[i:]:
-                    if is_squarefree_td(a * b + 1):
-                        return rep.fail(f"witness for N={n}: {a}*{b}+1 is squarefree")
-        rep.note(f"{len(c['witnesses'])} witness sets re-validated by trial division")
+            products.update(a * b + 1 for i, a in enumerate(A) for b in A[i:])
+        # every value where the sequence grows must carry a witness
+        prev = 0
+        for n, f, _ in c["sequence"]:
+            if f > prev and str(n) not in c["witnesses"]:
+                return rep.fail(f"f grows at N={n} without a witness")
+            prev = f
+        for n, f, c7, A in c["exceptions"]:
+            if not (A and len(A) == f > c7 and max(A) <= n):
+                return rep.fail(f"exception at N={n} lacks a valid witness")
+            products.update(a * b + 1 for i, a in enumerate(A) for b in A[i:])
+        # each distinct product checked once: divisible by p^2 for some prime p
+        P = nt.primes_upto(math.isqrt(max(products))) if products else []
+        bad = [m for m in products if not has_square_factor(m, P)]
+        if bad:
+            return rep.fail(f"witness product {min(bad)} is squarefree")
+        rep.note(f"{len(c['witnesses'])} witness sets ({len(products)} distinct products ab+1) "
+                 f"re-validated by direct division by prime squares")
         prev = 0
         for n, f, c7 in c["sequence"]:
             if f < prev or f < (1 if n >= 7 else 0) or c7 != class_size(n):
