@@ -1,0 +1,10 @@
+{
+ "checker": "p993-deletion-recurrence",
+ "details": [
+  "per-order tree counts agree with OEIS A000055",
+  "independent Pr\u00fcfer-sequence enumeration agrees for n <= 8",
+  "polynomials re-derived by deletion recurrence (all trees n <= 11, also by brute force; 300 sampled per larger n)"
+ ],
+ "ok": true,
+ "seconds": 30.869746743999713
+}

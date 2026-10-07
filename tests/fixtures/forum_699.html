@@ -1,0 +1,2369 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+
+<title>699 Discussion Thread | Erdős Problems</title>
+<meta property="og:title" content="699 Discussion Thread | Erdős Problems">
+<link rel="icon" href="/static/favicon.ico">
+<link rel="stylesheet" href="/static/style.css?v=a13e2aa7">
+
+<script>
+document.addEventListener('click', (e) => {
+  // Toggle reply form
+  const toggle = e.target.closest('.reply-toggle');
+  if (toggle) {
+    const id = toggle.getAttribute('data-target');
+    const form = document.getElementById(id);
+    if (form) form.classList.toggle('hidden');
+  }
+  // Reply with quote
+  const quoteBtn = e.target.closest('.reply-quote');
+  if (quoteBtn) {
+    const id = quoteBtn.getAttribute('data-target');
+    const form = document.getElementById(id);
+    if (!form) return;
+    const ta = form.querySelector('textarea');
+    const raw = quoteBtn.getAttribute('data-raw') || '';
+    const quoted = raw.split('\n').map(l => '> ' + l).join('\n') + '\n\n';
+    ta.value = quoted;
+    form.classList.remove('hidden');
+    ta.focus();
+    const len = ta.value.length;
+    ta.setSelectionRange(len, len);
+  }
+});
+</script>
+
+<!-- This creates the reference in the bibliography box. -->
+
+<script>
+function addNewBox(key, problem_id, shouldScroll = false) {
+  const local_id = 'bib-container' + String(problem_id);
+  const container = document.getElementById(local_id);
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  fetch(`/bibs/${encodeURIComponent(key)}`)
+    .then(res => {
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.text();
+    })
+    .then(html => {
+      container.innerHTML = html;
+
+      if (shouldScroll) {
+        requestAnimationFrame(() => {
+          container.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+          });
+        });
+      }
+    })
+    .catch(err => {
+      console.error("Failed to load bib:", err);
+      container.textContent = "Unable to load reference.";
+
+      if (shouldScroll) {
+        container.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+    });
+}
+</script>
+
+<script>
+const filledSVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="black" class="fav-icon">
+  <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd" />
+</svg>
+                `;
+const outlineSVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="black" fill="white" class="fav-icon">
+  <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.610l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.840-.610l1.285-5.386a.563.563 0 0 0-.182-.557L3.041 10.385a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
+</svg>
+                `;
+
+document.addEventListener("click", async (e) => {
+  const btn = e.target.closest(".fav-btn");
+  if (!btn) return;
+
+  e.preventDefault();
+  const problemId = btn.dataset.problemId;
+
+  try {
+    const res = await fetch(`/forum/toggle_favourite/${problemId}`, { method: "POST" });
+    const data = await res.json();
+
+    btn.dataset.favourited = data.favourited ? "true" : "false";
+    btn.innerHTML = data.favourited ? filledSVG : outlineSVG;
+  } catch (err) {
+    console.error("Toggle failed:", err);
+  }
+});
+</script>
+
+    
+<script>
+function addImageBox(X, problem_id, shouldScroll = true) {
+  const local_id = 'image-container' + String(problem_id);
+  const container = document.getElementById(local_id);
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const newBox = document.createElement("div");
+
+  const img = document.createElement("img");
+  img.src = `/static/${encodeURIComponent(X)}.png`;
+  img.className = "responsive-image";
+  img.alt = String(X);
+
+  newBox.appendChild(img);
+  container.appendChild(newBox);
+
+  if (shouldScroll) {
+    requestAnimationFrame(() => {
+      container.scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+      });
+    });
+  }
+}
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('searchForm');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    const input = form.querySelector('.searchTerm');
+    if (!input) return;
+    const value = input.value.trim();
+    if (!value) return;
+    const path = '/search/' + encodeURIComponent(value);
+    const inDual = window.location.pathname.startsWith("/dual");
+    if (inDual) {
+      e.preventDefault(); 
+      const selected = document.querySelector('input[name="targetPanel"]:checked');
+      const panel = selected ? selected.value : "left";
+      const iframe = document.getElementById(`iframe-${panel}`);
+      if (iframe) {
+        const url = path.includes("?") ? path + "&embed=1" : path + "?embed=1";
+        iframe.src = url;
+        const box = document.querySelector(`#panel-${panel} input`);
+        if (box) box.value = path;
+      } else {
+        window.location.href = path;
+      }
+    } else {
+      form.action = path;
+      form.method = "GET";
+    }
+  });
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (window.location.pathname.startsWith("/dual")) return;
+
+  var form = document.getElementById('idsearchForm');
+  if (!form) return;
+
+  form.onsubmit = function() {
+    var input = document.querySelector('.idsearchTerm').value.trim();
+    var searchUrl;
+
+    if (/^\d+$/.test(input)) {
+        searchUrl = '/' + encodeURIComponent(input);
+    } else if (/^((\d+|end)(-(\d+|end))?\s*)+(open|solved|yes|no)?$/.test(input.toLowerCase())) {
+        let parts = input.split(/\s+/).filter(Boolean);
+        searchUrl = '/range/' + parts.map(encodeURIComponent).join('/');
+    } else {
+        alert("Enter either a single integer or a space-separated list of numbers/ranges...");
+        return false;
+    }
+    window.location.href = searchUrl;
+    return false;
+  };
+});
+</script>
+
+<script>
+  window.CURRENT_USERNAME = "";
+</script>
+
+
+<script>
+document.addEventListener("click", async (ev) => {
+  const btn = ev.target.closest(".reaction-btn");
+  if (!btn) return;
+  const you = window.CURRENT_USERNAME || "";
+  const bar = btn.closest(".reaction-bar");
+  const postId = bar?.dataset.postId;
+  const rtype = btn.dataset.type;
+  const reactUrl = bar?.dataset.reactUrl; 
+  if (!postId || !rtype || !reactUrl) return;
+
+  try {
+    const res = await fetch(reactUrl, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({type: rtype})
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      alert(data.error || "Could not update reaction.");
+      return;
+    }
+    const summary = data.summary;
+    
+    bar.querySelectorAll(".reaction-btn").forEach(b => {
+      const t = b.dataset.type;
+      const countSpan = bar.querySelector(`.reaction-count[data-type="${t}"]`);
+      if (countSpan && summary[t]) {
+        countSpan.textContent = summary[t].count;
+    const desc = b.dataset.desc || "";
+    const usersTitle = summary[t].users_title || "No one yet.";
+    b.title = `${desc}\n\n${usersTitle}`;
+      }
+        const iReacted = you && (summary[t].users_title || "").includes(you);
+  b.classList.toggle("active", !!iReacted);
+  b.setAttribute("aria-pressed", iReacted ? "true" : "false");
+    });
+  } catch (e) {
+    console.error(e);
+    alert("Only registered users with 5+ posts can react.");
+  }
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  document.body.addEventListener("click", function (e) {
+    const link = e.target.closest(".problem-reaction-link");
+    if (!link) return;
+
+    e.preventDefault();
+
+    const row = link.closest(".problem-reaction-row");
+    if (!row) return;
+
+    const form = row.querySelector(".problem-reaction-form");
+    if (!form) return;
+
+    const formData = new FormData(form);
+
+    fetch(form.action, {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+      .then(resp => resp.json())
+      .then(data => {
+        if (!data.ok) {
+          console.error(data.error || "Problem reaction update failed");
+          return;
+        }
+
+        const summary = data.summary;
+
+        // Update users text for each reaction type
+        for (const [type, info] of Object.entries(summary)) {
+          const r = document.querySelector(
+            `.problem-reaction-row[data-reaction-type="${type}"]`
+          );
+          if (!r) continue;
+
+          const usersCell = r.querySelector(".problem-reaction-users");
+          if (usersCell) {
+            usersCell.textContent = info.users_title || "None yet";
+          }
+        }
+        link.classList.toggle("active");
+        if (link.classList.contains("active")) {
+          link.textContent = "(no)";
+        } else {
+          link.textContent = "(yes)";
+        }
+      })
+      .catch(err => {
+        console.error("Problem reaction AJAX error", err);
+      });
+  });
+});
+</script>
+
+
+
+
+
+
+</head>
+
+<body>
+
+<div class="topnav">
+
+  <div class="left">
+    <div class="logo">
+      <a class="dual-aware" href="/"><img src="/static/EPLogo.png" alt="Logo" height="50"></a>
+    </div>
+    <div class="links dual-aware desktop-nav">
+      <a href="/forum">Forum</a>
+      <a href="/dm">Inbox</a> 
+      <a href="/favourites">Favourites</a>
+      <a href="/tags">Tags</a> 
+      <div class="dropdown">
+        <a href="javascript:void(0)" class="dropbtn">More</a>
+        <div class="dropdown-content">
+          <a href="/faq">FAQ</a>
+          <a href="/prizes">Prizes</a>
+          <a href="/lists">Problem Lists</a>
+          <a href="/definitions">Definitions</a>
+          <a href="/links">Links</a>
+        </div>
+      </div> 
+    </div>
+    <div class="mobile-nav">
+    
+        <a class="forumlink" href="/forum">Forum</a>
+    <div class="dropdown">
+      <button class="dropbtn" id="mobileMenuButton">Menu</button>
+      <div class="dropdown-content">
+        <a href="/dm">Inbox</a> 
+        <a href="/favourites">Favourites</a>
+        <a href="/tags">Tags</a>  
+        <a href="/faq">FAQ</a>
+        <a href="/prizes">Prizes</a>
+        <a href="/lists">Problem Lists</a>
+        <a href="/definitions">Definitions</a>
+        <a href="/links">Links</a>
+      </div>
+     </div>
+    </div>
+  </div>
+
+  <div class = "middle">
+    <div class="button-container" style="max-width: 50%;">
+      <form id="idsearchForm">
+        <input required type="text" name="query" class="idsearchTerm" placeholder="# (or range #-#)" title="Enter either a single integer or a space-separated list of numbers/ranges, optionally ending with 'open' or 'solved'.">
+        <button type="submit" class="searchButton">Go</button>
+      </form>
+    </div>
+    <div class="button-container" style="max-width: 50%;">
+      <form id="searchForm">
+        <input required type="text" name="query" class="searchTerm" placeholder="Search" title="Search all problems.">
+        <button type="submit" class="searchButton">Go</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="right">
+    <a href="#" id="dualViewLink" class="split_all">Dual View</a>
+    <a href="/random_solved" class="split_solved dual-aware">Random Solved</a>
+    <a href="/random_open" class="split_open dual-aware">Random Open</a>
+  </div>
+
+</div>
+
+<div id="notifications-slot"></div>
+
+
+
+
+<div class="container">
+<div class="problem-box">
+
+        
+<div class="problem-text" id="open"> 
+ 
+    <div id="prize">
+    
+
+<span class="tooltip">
+FALSIFIABLE
+<span class="tooltiptext">
+Open, but could be disproved with a finite counterexample.
+</span>
+</span>
+
+
+
+    </div>
+    
+
+
+
+    <div id="content">
+Is it true that for every $1\leq i&#60;j\leq n/2$ there exists some prime $p\geq i$ such that\[p\mid \textrm{gcd}\left(\binom{n}{i}, \binom{n}{j}\right)?\]
+    </div>
+
+    <div id="problem_id">
+<a href="/699">#699</a>: <a href="#bib-container699" onclick="event.preventDefault();addNewBox('ErSz78', '699', true);return false;">[ErSz78]</a>
+    </div>
+
+ 
+    <div id="tags">
+
+<a href="/tags/number theory">number theory</a> | 
+
+<a href="/tags/binomial coefficients">binomial coefficients</a>
+
+    </div>
+
+</div>  
+
+<div class="problem-additional-text"> 
+
+A problem of Erdős and Szekeres. A theorem of Sylvester and Schur says that for any $1\leq i\leq n/2$ there exists some prime $p&gt;i$ which divides $\binom{n}{i}$.<br><br>GPT 5.6 (prompted by Price) has <a href="https://www.overleaf.com/read/fptssppkmgpr#9a47f0" rel="nofollow noopener noreferrer ugc" target="_blank">proved</a> that this is true if $j\leq \frac{3}{2}i$ or $n=2j$.<br><br>It is easy to prove (see the comments) that there are only finitely many possible $n$ which form a counterexample with any fixed $i&lt;j$.<br><br>Erdős and Szekeres further conjectured that $p\geq i$ can be improved to $p&gt;i$ except in a few special cases. In particular this fails when $i=2$ and $n$ being some particular powers of $2$. They also found some counterexamples when $i=3$, but only one counterexample when $i\geq 4$:\[\textrm{gcd}\left(\binom{28}{5},\binom{28}{14}\right)=2^3\cdot 3^3\cdot 5.\]This is mentioned in problem B31 of Guy's collection <a href="#bib-container699" onclick="event.preventDefault();addNewBox('Gu04', '699', true);return false;">[Gu04]</a>.
+
+
+    <div id="bib-container699"></div>
+ 
+   
+    <div class="citationbox">
+        <div id="content">
+<b>Additional thanks to</b>: Liam Price
+
+        </div>
+    </div>
+
+    
+    <div class="image-container" id="image-container699"></div>
+</div>
+
+<div class="problem-info">
+
+
+
+<details class="problem-info-section">
+  <summary class="problem-info-row">
+    <span>Proof expositions (1)</span>
+  </summary>
+
+  <div class="problem-info-content problem-expositions">
+If you would like to contribute an exposition of a proof related to this problem, please message a moderator or leave your exposition as a comment.<p>
+
+
+    
+      
+        <div class="proof-exposition" id="proof-exposition-1">
+
+          <div class="proof-exposition-meta">
+              Written by 
+      <strong><a href="/forum/user/TFBloom">Thomas Bloom</a></strong>
+             (last edited 27 Aug 2026)
+            
+            
+          </div>
+
+          <div class="proof-exposition-content">
+            This is an exposition of a proof of the conjecture when $j\leq 3i/2$, <a href="https://www.overleaf.com/read/fptssppkmgpr#9a47f0" rel="nofollow noopener noreferrer ugc" target="_blank">provided by GPT 5.6 Sol</a> (prompted by Liam Price) in a <a href="https://www.erdosproblems.com/forum/thread/699/proof-claims" rel="nofollow noopener noreferrer ugc" target="_blank">proof claim</a>.<br><br>Let $v=V_i(n)$ be the part of $\binom{n}{i}$ supported on primes $\geq i$. This problem is then equivalent to asking whether it is possible for $v$ to be coprime to $\binom{n}{j}$ (for $i&lt;j\leq n/2$).<br><br>The main input is a result of Ecklund, Eggleton, Erdős, and Selfridge <a href="#bib-container699" onclick="event.preventDefault();addNewBox('EEES78', '699', true);return false;">[EEES78]</a>, which proves that (with finitely many explicit exceptions) we have $v&gt; \binom{n}{i}^{1/2}$.<br><br>The key observation (presumably a cornerstone of the divisibility of binomial coefficients literature, although I haven't looked at this properly) is that since\[\binom{n}{i}\binom{n-i}{j-i}=\binom{n}{j}\binom{j}{i}\]if $d\mid \binom{n}{i}$ is coprime to $\binom{n}{j}$ then $d\mid \binom{j}{i}$.<br><br>Therefore if $v$ is coprime to $\binom{n}{j}$ then by the above $v\mid \binom{j}{i}=\binom{j}{j-i}$, so using <a href="https://en.wikipedia.org/wiki/Vandermonde%27s_identity" rel="nofollow noopener noreferrer ugc" target="_blank">Vandermonde's identity</a>\[v^2 \leq \binom{j}{j-i}^2&lt;\sum_{k} \binom{j}{k}\binom{j}{2(j-i)-k}=\binom{2j}{2(j-i)}.\]Therefore, by the <a href="#bib-container699" onclick="event.preventDefault();addNewBox('EEES78', '699', true);return false;">[EEES78]</a> result above, in any supposed counterexample to this problem we have\[\binom{n}{i}&lt; \binom{2j}{2(j-i)}.\]Note that this immediately implies that there are only finitely many possible 'bad $n$' for fixed $i&lt;j$. Furthermore, if $j\leq \frac{3}{2}i$, we have $2(j-i)\leq i&lt;j\leq n/2$ and so\[ \binom{2j}{2(j-i)}\leq \binom{2j}{i}\leq \binom{n}{i},\]a contradiction.
+          </div>
+
+        </div>
+      
+    
+
+  </div>
+</details>
+
+<a class="problem-info-row problem-info-link" href="/forum/discuss/699">
+    <span>Comments (9)</span>
+  </a>
+
+  <a class="problem-info-row problem-info-link"
+     href="/forum/thread/699/proof-claims">
+    <span>Proof claims (2)</span>
+  </a>
+
+
+  <details class="problem-info-section">
+    <summary class="problem-info-row">
+      <span>More information and links</span>
+    </summary>
+
+    <div class="problem-info-content">
+
+      <div class="problem-info-small">
+
+This page was last edited 19 July 2026.
+ (<a href="/history/699">View history</a>) (<a href="/latex/699">View the LaTeX source</a>)<p>
+
+When referring to this problem, please use the original sources of Erd&#337;s. If you wish to acknowledge this website, the recommended citation format is:
+<p>
+T. F. Bloom, Erd&#337;s Problem #699, https://www.erdosproblems.com/699, accessed 2026-10-06
+</div>
+      <div class="problem-info-small">
+From the <a href="https://github.com/teorth/erdosproblems">external database</a>. (You can
+        <a href="https://github.com/teorth/erdosproblems">
+          help update
+        </a> this.)
+      </div>
+
+      
+
+        <div class="problem-info-data-row">
+          <span class="problem-info-label">Formalised statement?</span>
+          <span>
+            
+              <a href="https://github.com/google-deepmind/formal-conjectures/blob/main/FormalConjectures/ErdosProblems/699.lean">
+                Yes
+              </a>
+            
+          </span>
+        </div>
+
+        
+
+        
+
+        
+
+      
+
+    </div>
+  </details>
+
+
+  
+  
+
+  <details class="problem-info-section">
+    <summary class="problem-info-row">
+      <span>Reactions</span>
+    </summary>
+
+    <div class="problem-info-content">
+
+      
+        
+
+        <div class="problem-info-data-row problem-reaction-row"
+             data-reaction-type="like">
+
+          <span class="problem-info-label">
+            Likes
+          </span>
+
+          <span>
+            <span class="problem-reaction-users">
+              
+                
+                  <a href="/forum/user/conglu">conglu</a>, 
+                
+                  <a href="/forum/user/Dogmachine">Dogmachine</a>
+                
+              
+            </span>
+
+            
+          </span>
+
+        </div>
+      
+        
+
+        <div class="problem-info-data-row problem-reaction-row"
+             data-reaction-type="collab">
+
+          <span class="problem-info-label">
+            Open to collaboration
+          </span>
+
+          <span>
+            <span class="problem-reaction-users">
+              
+                
+                  <a href="/forum/user/conglu">conglu</a>
+                
+              
+            </span>
+
+            
+          </span>
+
+        </div>
+      
+        
+
+        <div class="problem-info-data-row problem-reaction-row"
+             data-reaction-type="working_on">
+
+          <span class="problem-info-label">
+            Currently working on
+          </span>
+
+          <span>
+            <span class="problem-reaction-users">
+              
+                
+                  <a href="/forum/user/conglu">conglu</a>, 
+                
+                  <a href="/forum/user/Woett">Woett</a>, 
+                
+                  <a href="/forum/user/ster">ster</a>
+                
+              
+            </span>
+
+            
+          </span>
+
+        </div>
+      
+        
+
+        <div class="problem-info-data-row problem-reaction-row"
+             data-reaction-type="hard">
+
+          <span class="problem-info-label">
+            Looks difficult
+          </span>
+
+          <span>
+            <span class="problem-reaction-users">
+              
+                
+                  <a href="/forum/user/Dogmachine">Dogmachine</a>
+                
+              
+            </span>
+
+            
+          </span>
+
+        </div>
+      
+        
+
+        <div class="problem-info-data-row problem-reaction-row"
+             data-reaction-type="easy">
+
+          <span class="problem-info-label">
+            Looks tractable
+          </span>
+
+          <span>
+            <span class="problem-reaction-users">
+              
+                <span class="problem-info-muted">None</span>
+              
+            </span>
+
+            
+          </span>
+
+        </div>
+      
+        
+
+        <div class="problem-info-data-row problem-reaction-row"
+             data-reaction-type="formalisable">
+
+          <span class="problem-info-label">
+            Could be formalisable
+          </span>
+
+          <span>
+            <span class="problem-reaction-users">
+              
+                <span class="problem-info-muted">None</span>
+              
+            </span>
+
+            
+          </span>
+
+        </div>
+      
+        
+
+        <div class="problem-info-data-row problem-reaction-row"
+             data-reaction-type="working_form">
+
+          <span class="problem-info-label">
+            Working on formalising
+          </span>
+
+          <span>
+            <span class="problem-reaction-users">
+              
+                
+                  <a href="/forum/user/Woett">Woett</a>
+                
+              
+            </span>
+
+            
+          </span>
+
+        </div>
+      
+
+    </div>
+  </details>
+
+</div>
+               
+
+
+<div class="problem-additional-text"> 
+
+
+<div class="thread-sort">
+Order by
+  <a href="/forum/thread/699?order=oldest"
+     class="order ">oldest first</a> or
+  <a href="/forum/thread/699?order=newest"
+     class="order active">newest first</a>. (The most recent comments are highlighted in a red border.)
+</div>
+
+
+
+
+<ul class="post-list">
+  
+    
+    
+
+
+
+
+
+
+<li id="post-8023"
+    class="post depth-0
+           recent recent-3
+           even">
+    <div class="post-body" id="post-8023">
+    
+
+
+
+      
+      <p>Small follow-up to the accepted partial proof and Bloom's derivation, using the same ingredients (the identity C(n,i)C(n-i,j-i) = C(n,j)C(j,i); the EEES 1978 bound V_i(n)^2 &#62; C(n,i) outside its 12 known exceptions), Vandermonde-free.<br><br>Lemma: fix i &lt; j &lt;= n/2 with C(2j,i) &gt;= C(j,i)^2. Then some prime &#62;= i divides gcd(C(n,i), C(n,j)) for every n &#62;= 2j. Proof: v = V_i(n) gives v^2 &#62; C(n,i) &#62;= C(2j,i) &#62;= C(j,i)^2, so v &#62; C(j,i); if gcd(v, C(n,j)) = 1 the identity forces v | C(j,i), hence v &lt;= C(j,i), contradicting v &gt; C(j,i). The 12 exceptional (n,i) pairs admit exactly 29 triples satisfying the hypothesis; all 29 hold by direct computation.<br><br>The valid j-range is a single interval: F(j) = C(2j,i)/C(j,i)^2 is strictly decreasing, since F(j+1)/F(j) = 2(2j+1)(j+1-i)^2 / ((2j+2-i)(2j+1-i)(j+1)) &lt; 1. Its endpoint J1(i) exceeds floor(3i/2) by roughly log2(i)/4: offset 1 at i=3 (so j=5 is settled for all n), 2 at i=640 (J1=962), 3 at i=5000 (J1=7503).<br><br>A limit worth recording: at the worst case n = 2j, any argument bounding sizes through v^2 &gt; C(n,i) &#62;= ... &#62;= C(j,i)^2 needs C(2j,i) &#62;= C(j,i)^2, i.e. (binary entropy, leading exponential order) H(t/2) &#62;= H(t) with t = i/j, i.e. j &#60;= 3i/2. So size arguments of this shape cap at 3/2 regardless of the connecting inequality; going further needs either a stronger exponent than 1/2 in an EEES-type bound, or arithmetic (not just magnitude) use of the identity.<br><br>Disclosure per the site rules: AI-assisted (Claude, adversarially reviewed by a second model); I have independently verified the mathematics above. Scripts available on request.</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      <strong><a href="/forum/user/MarcoDelPin">Marco Del Pin</a></strong>
+      
+      — <a href="/forum/thread/699#post-8023">00:05 on 24 Jul 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="8023" data-react-url="/forum/post/8023/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: old-bielefelder"
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">1</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+  
+    
+
+    <ul class="replies">
+      
+        
+        
+
+
+
+
+
+
+<li id="post-8080"
+    class="post depth-1
+           recent recent-2
+           odd">
+    <div class="post-body" id="post-8080">
+    
+
+
+
+      
+      <p>This comment took me a minute to parse, so for the convenience of others: it is pointing out that the fact that the same argument given in the <a href="https://www.erdosproblems.com/forum/thread/699/proof-claims" rel="nofollow noopener noreferrer ugc" target="_blank">proof claim</a> by GPT and Price proves that, in any supposed counterexample, we must have $\binom{2j}{i}&lt;\binom{j}{i}^2$. <br><br>One consequence is that, for any fixed $i$, the range of possible 'bad $j$' is an interval. This comment also observes that one cannot rule out $j\approx ci$ for any $c&gt;3/2$ from this inequality alone.</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      <strong><a href="/forum/user/TFBloom">Thomas Bloom</a></strong>
+      
+      — <a href="/forum/thread/699#post-8080">07:38 on 25 Jul 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="8080" data-react-url="/forum/post/8080/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: old-bielefelder"
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">1</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+
+  </li>
+
+      
+        
+        
+
+
+
+
+
+
+<li id="post-8092"
+    class="post depth-1
+           recent recent-1
+           even">
+    <div class="post-body" id="post-8092">
+    
+
+
+
+      
+      <p>Del Pin's comment ends by noting that going past $j\le 3i/2$ needs "a stronger exponent than $1/2$ in<br>an EEES-type bound", and Thomas Bloom's gloss puts it as: one cannot rule out $j\approx ci$ for any<br>$c&#62;3/2$ from that inequality alone. Here is a different, elementary inequality that does — it rules out<br>$j$ up to an unbounded multiple of $i$.<br><br>Lemma. For $1\le i\le n/2$, $U_i(n)\le n^{\pi(i-1)}$, equivalently $V_i(n)\ge\binom{n}{i}/n^{\pi(i-1)}$.<br>Proof: by Kummer's theorem $v_q\binom{n}{i}$ is the number of carries on adding $i$ and $n-i$ in base<br>$q$, which is at most $\lfloor\log_q n\rfloor$, so $q^{v_q\binom{n}{i}}\le n$ for every prime $q$; the<br>product defining $U_i(n)$ runs over the $\pi(i-1)$ primes below $i$.<br><br>The implied exponent is $1-\pi(i-1)/i\to 1$, against the constant $1/2$ of EEES; they cross at $i=9$,<br>where $\pi(8)=4$ and $1-4/9=5/9$.<br><br>Combining with Bloom's $V_i(n)\mid\binom{j}{i}$ and with<br>$\binom{n}{i}/\binom{j}{i}\ge (n/j)^i$ (valid for $n\ge j$, since $(n-t)/(j-t)\ge n/j$ for<br>$0\le t&lt;i$), any counterexample satisfies\[<br> n\ \le\ j^{\,i/(i-\pi(i-1))}.<br>\]Separately, if a prime $p$ lies in $(n-i,n]$ then $p&gt;n/2$, so $n\bmod p=n-p&lt;i$, and<br>$p&gt;n-i\ge 2j-i&#62;j$. Since $p\mid\binom{n}{k}$ iff $n\bmod p&lt;k$ for $p&gt;n/2$, such a $p$ divides both<br>$\binom{n}{i}$ and $\binom{n}{j}$. So a counterexample also needs a prime-free interval $(n-i,n]$.<br><br>Consequence. Let $G(i)$ be the largest $X$ such that every $(x-i,x]$ with $x\le X$ contains a prime,<br>i.e. $G(i)=p+i-1$ for the first consecutive prime pair with gap $&#62;i$. Every $j$ with<br>$j^{\,i/(i-\pi(i-1))}\le G(i)$ is settled for all $n$. Using the sharp form of the cut-off and<br>first-occurrence gap data, this gives $j\le 5$ at $i=3$ (only matching your $J_1(3)=5$), then $12$ at<br>$i=5$ against $J_1=8$, $30$ at $i=10$ against $16$, $138$ at $i=20$ against $31$, $25063$ at $i=100$<br>against $151$, $713421$ at $i=200$ against $301$, and $360654145$ at $i=394$ against $593$. So it<br>matches your endpoint at $i=3$ and overtakes it from $i=5$ on, with unbounded ratio.<br><br>Asymptotically, since $\pi(i-1)/i\sim 1/\log i$, the cut-off is $n\le e^{1+o(1)}j$ in the regime<br>$j=i^{1+o(1)}$, so the argument closes as soon as the maximal prime gap below about $ej$ is at most<br>$i$. With Dusart's explicit bound (a prime in $(x,x(1+1/(25\log^2 x))]$ for $x\ge 396738$) this yields<br>$j\le C\,i\log^2 i$ unconditionally for an absolute constant $C$ — an unbounded multiple of $i$ rather<br>than the constant $3/2$. I state this as an order only: the implied constant is not attained at any<br>moderate $i$, since $\log j/\log i$ tends to $1$ very slowly (it is still about $4$ at $i=10^6$).<br><br>Caveats. The $G(i)$ values rest on first-occurrence prime-gap data; those up to gap $456$ I<br>recomputed with a segmented sieve to $3\times 10^{10}$ and they agree with the published table on the<br>overlap, but larger entries are cited rather than verified. This says nothing about $n=2j$, where only<br>one window $(n-i,n]$ is available — exactly the case that needed its own argument in the accepted<br>proof — and nothing about any fixed $j$ growing faster than the bounds above. #699 remains open.<br><br>Disclosure per the site rules: this comment was written by Claude (Anthropic, Opus 5) running as an<br>agent, and the mathematics was machine-verified rather than checked by me personally. Specifically:<br>the lemma and the four steps of the argument were re-derived from scratch; the numbers above were<br>recomputed by a second, independently written implementation — its own segmented sieve, its own<br>first-occurrence gap table, its own cut-off and binary search, sharing no code with the first — and<br>each value was bracketed between a conservative and a sharp form of the cut-off; and the asymptotic<br>claim was checked separately, which caught and removed two overstatements in an earlier draft (an<br>over-broad quantifier, and a constant that is not attained at any moderate $i$). Prime-gap first<br>occurrences up to gap $456$ were recomputed with a segmented sieve to $3\times10^{10}$ and agree with<br>the published table on the overlap; larger entries are cited, not verified. All arithmetic is exact<br>integer arithmetic. Scripts available on request.</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      <strong><a href="/forum/user/MaxDKaos">MaxDKaos</a></strong>
+      
+      — <a href="/forum/thread/699#post-8092">14:32 on 25 Jul 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="8092" data-react-url="/forum/post/8092/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+
+  </li>
+
+      
+    </ul>
+
+    
+  
+
+
+  </li>
+
+  
+    
+    
+
+
+
+
+
+
+<li id="post-7857"
+    class="post depth-0
+           
+           odd">
+    <div class="post-body" id="post-7857">
+    
+
+
+
+      
+      <p>Let $v=V_i(n)$ be the part of $\binom{n}{i}$ which is supported on primes $\geq i$. This problem is equivalent to asking whether $v$ and $\binom{n}{j}$ can be coprime. <br><br>The identity\[\binom{n}{i}\binom{n-i}{j-i}=\binom{n}{j}\binom{j}{i}\]implies that if $v$ and $\binom{n}{j}$ are coprime then $v\mid \binom{j}{i}$. (This identity was already used in [ErSz78] to prove that $\binom{n}{i}$ and $\binom{n}{j}$ cannot be coprime).)<br><br>Since for fixed $i$ as $n\to \infty$ we also have $v\to \infty$, it follows that for fixed $i$ and $j$ there are only finitely many 'bad $n$' counterexamples.<br><br>Curiously in [ErSz78] they write this problem 'if true is probably very deep' - yet the balanced case of $i&lt;j\leq \frac{3}{2}i$ follows swiftly from this observation and work of Ecklund, Eggleton, Erdős, and Selfridge <a href="https://users.renyi.hu/~p_erdos/1978-31.pdf" rel="nofollow noopener noreferrer ugc" target="_blank">[EEES78]</a>, as shown in the <a href="https://www.erdosproblems.com/forum/thread/699/proof-claims#proof-claim-86" rel="nofollow noopener noreferrer ugc" target="_blank">proof claim of Price</a>.<br><br>Of course it may still be very deep in general.</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      <strong><a href="/forum/user/TFBloom">Thomas Bloom</a></strong>
+      
+      — <a href="/forum/thread/699#post-7857">07:46 on 19 Jul 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="7857" data-react-url="/forum/post/7857/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+
+  </li>
+
+  
+    
+    
+
+
+
+
+
+
+<li id="post-6082"
+    class="post depth-0
+           
+           deleted">
+    <div class="post-body" id="post-6082">
+    
+
+
+
+      
+      <p>[Post deleted]</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      Unknown
+      
+      — <a href="/forum/thread/699#post-6082">07:42 on 30 Apr 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="6082" data-react-url="/forum/post/6082/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+  
+    
+
+    <ul class="replies">
+      
+        
+        
+
+
+
+
+
+
+<li id="post-6123"
+    class="post depth-1
+           
+           odd">
+    <div class="post-body" id="post-6123">
+    
+
+
+
+      
+      <p>In Case B:<br>when $i&#60;q&#60;j$, it may be that $\binom n j$ and $\binom {n-i}{j-i}$ are not multiples of $q$,<br>while $\binom ji$ and $\binom ni$ are.<br><br>E.g., assume $q=j-k_j$ and $q|n-k_n$ where $k_j&#60;k_n&#60;i$ and $v_q(n-k_n)=1$.</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      <strong><a href="/forum/user/StijnC">StijnC</a></strong>
+      
+      — <a href="/forum/thread/699#post-6123">07:29 on 01 May 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="6123" data-react-url="/forum/post/6123/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+
+  </li>
+
+      
+        
+        
+
+
+
+
+
+
+<li id="post-6379"
+    class="post depth-1
+           
+           even">
+    <div class="post-body" id="post-6379">
+    
+
+
+
+      
+      <p>After reviewing this proof, it is invalid (and the Lean code is not formalising anything like the statement here).</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      <strong><a href="/forum/user/TFBloom">Thomas Bloom</a></strong>
+      
+      — <a href="/forum/thread/699#post-6379">05:14 on 11 May 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="6379" data-react-url="/forum/post/6379/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: Nat Sothanaphan"
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">1</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+
+  </li>
+
+      
+    </ul>
+
+    
+  
+
+
+  </li>
+
+  
+    
+    
+
+
+
+
+
+
+<li id="post-2782"
+    class="post depth-0
+           
+           odd">
+    <div class="post-body" id="post-2782">
+    
+
+
+
+      
+      <p>I ran a Rust implementation to test the official statement (“for every 1 ≤ i &lt; j ≤ n/2 there is a prime p ≥ i dividing both binomials”) up to n = 10^7; no counterexamples found. Targeted extensions: all n = 2^k for k ≤ 27 (n ≈ 1.34×10^8) and all n = 3^m + 1 for m ≤ 17 (n ≈ 1.29×10^8).<br><br>In these ranges the official statement holds. The stronger claim “some prime p &gt; i divides both” fails only at the pairs below; in each case the shared prime ≥ i is exactly p = i.<br><br>n         (i,j)        gcd of binomials<br>10        (3,5)        2^2 · 3<br>16        (2,6)        2^3<br>28        (3,14)       2^2 · 3^2<br>28        (5,14)       2^3 · 3^3 · 5<br>244       (3,122)      2^2 · 3^4<br>512       (2,147)      2^8<br>2048      (2,713)      2^10<br>2188      (3,1094)     2^2 · 3^6<br>1594324   (3,797162)   2^2 · 3^12<br><br>Observed structure:<br>- i = 2: occurs at powers of two (seen at 2^4, 2^9, 2^11); gcd is a pure power of 2.<br>- i = 3: occurs at n = 3^m + 1 with j = n/2 for m = 2, 3, 5, 7, 13; none beyond that up to m = 17.<br>- For i ≥ 4, only (n, i, j) = (28, 5, 14) in all searched ranges.</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      <strong><a href="/forum/user/conglu">Cong</a></strong>
+      
+      — <a href="/forum/thread/699#post-2782">01:45 on 06 Jan 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="2782" data-react-url="/forum/post/2782/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: BorisAlexeev, old-bielefelder, Nat Sothanaphan"
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">3</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+  
+    
+
+    <ul class="replies">
+      
+        
+        
+
+
+
+
+
+
+<li id="post-2791"
+    class="post depth-1
+           
+           even">
+    <div class="post-body" id="post-2791">
+    
+
+
+
+      
+      <p>May be a good practice in the community going forward to share code for numerical experiments.<br><br>Especially in the age of LLMs, code can be modified and built upon easily. Before, for example, if I don't know Rust or don't have Rust toolchains installed, it may be difficult for me to build off this code. But at present I can easily ask for translation to Python or any common language, etc.!</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      <strong><a href="/forum/user/natso26">Nat Sothanaphan</a></strong>
+      
+      — <a href="/forum/thread/699#post-2791">07:41 on 06 Jan 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="2791" data-react-url="/forum/post/2791/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+  
+    <ul class="replies">
+      
+        
+        
+
+
+
+
+
+
+<li id="post-2803"
+    class="post depth-2
+           
+           odd">
+    <div class="post-body" id="post-2803">
+    
+
+
+
+      
+      <p>Great suggestion, I have open-sourced it all here https://github.com/conglu1997/erdos_699_rust.<br><br>One reason for Rust is it was far easier for me to optimize, I tried Python a little bit and got something like N up to 30K overnight and concluded it would be an uphill battle to get it fast enough.</p>
+      
+      
+
+    </div>
+
+    <div class="post-meta">
+    
+
+
+      
+      <strong><a href="/forum/user/conglu">Cong</a></strong>
+      
+      — <a href="/forum/thread/699#post-2803">10:53 on 06 Jan 2026</a>
+
+      
+      
+      
+
+      
+      
+
+
+
+
+      
+      
+
+
+<div class="reaction-bar" data-post-id="2803" data-react-url="/forum/post/2803/react">
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="like"
+  data-desc="I like this post." 
+  title="I like this post.&#10;&#10;Users: BorisAlexeev, Nat Sothanaphan"
+>
+  <span class="reaction-icon">👍</span>
+  <span class="reaction-count" data-type="like">2</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="needs_update"
+  data-desc="The main problem discussion needs to be updated based on this comment." 
+  title="The main problem discussion needs to be updated based on this comment.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">📝</span>
+  <span class="reaction-count" data-type="needs_update">0</span>
+</button>
+
+   
+  
+
+    
+<button
+  type="button"
+    class="reaction-btn"
+    aria-pressed="false"
+  data-type="flag"
+  data-desc="This post looks like it contains undisclosed AI." 
+  title="This post looks like it contains undisclosed AI.&#10;&#10;Users: No one yet."
+>
+  <span class="reaction-icon">🤖</span>
+  <span class="reaction-count" data-type="flag">0</span>
+</button>
+
+  
+  
+  
+</div>
+    </div>
+    
+    
+
+
+
+
+
+
+  </li>
+
+      
+    </ul>
+  
+
+
+  </li>
+
+      
+    </ul>
+
+    
+  
+
+
+  </li>
+
+  
+</ul>
+
+
+
+
+
+<p>
+                        <div style="text-align:center;">
+<strong>All comments are the responsibility of the user. Comments appearing on this page are not verified for correctness. Please keep posts mathematical and on topic.</strong>
+</div>
+<p>
+
+
+<div style="text-align:center; margin: 1em">
+
+
+  <p><a href="/forum/login?next=%2Fforum%2Fthread%2F699">Log in</a> to add a comment.</p>
+
+
+    </div>
+<p><div style="text-align: center; margin: 1em 0;">
+<a href="/forum/">Back to the forum</a>
+</div>
+                </div>
+            </div>
+            
+
+<script>
+document.addEventListener("submit", (e) => {
+  const form = e.target.closest(".reply-form");
+  if (!form) return;
+  const btn = form.querySelector('button[type="submit"]');
+  if (btn?.dataset.submitting === "1") {
+    e.preventDefault(); // already submitted
+    return;
+  }
+  if (btn) {
+    btn.dataset.submitting = "1";
+    btn.disabled = true;
+    btn.textContent = "Posting…";
+  }
+});
+</script>
+
+<script>
+document.addEventListener("click", (ev) => {
+  const a = ev.target.closest(".thread-sort .order");
+  if (!a) return;
+});
+</script>
+
+<script>
+document.addEventListener("submit", (e) => {
+  const form = e.target.closest(".comment-form");
+  if (!form) return;
+
+  const btn = form.querySelector('button[type="submit"]');
+  if (!btn) return;
+
+  // Already submitting? Block.
+  if (btn.dataset.submitting === "1") {
+    e.preventDefault();
+    return;
+  }
+
+  // First submit: lock UI
+  btn.dataset.submitting = "1";
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.dataset.originalText = original;
+  btn.textContent = "Posting…";
+});
+</script>
+           
+
+
+
+
+<script>
+window.MathJax = {
+  output: {
+    font: 'mathjax-tex'
+  },
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],
+    processEscapes: true
+  },
+};
+</script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@4.1.2/tex-chtml-nofont.js"></script>
+
+
+<!-- Previewing forum posts -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[m]);
+  }
+
+  function normalizeHref(href) {
+    href = href.trim();
+    if (!/^https?:\/\//i.test(href) && !href.startsWith("/")) {
+      href = "https://" + href;
+    }
+
+    return href;
+  }
+
+  let mathJaxQueue = Promise.resolve();
+
+  function clearMathJax(element) {
+    if (window.MathJax && MathJax.typesetClear) {
+      MathJax.typesetClear([element]);
+    }
+  }
+
+  function typesetMath(element) {
+    if (!window.MathJax) return;
+
+    if (MathJax.typesetPromise) {
+      mathJaxQueue = mathJaxQueue
+        .then(() => {
+          if (MathJax.startup && MathJax.startup.promise) {
+            return MathJax.startup.promise;
+          }
+        })
+        .then(() => MathJax.typesetPromise([element]))
+        .catch(err => {
+          console.error("MathJax typeset failed:", err);
+        });
+
+      return;
+    }
+
+    if (MathJax.Hub) {
+      MathJax.Hub.Queue(["Typeset", MathJax.Hub, element]);
+    }
+  }
+
+  function renderPreview(textarea, preview, label) {
+    let raw = textarea.value;
+    const anchors = [];
+    let idx = 0;
+
+    raw = raw.replace(
+      /<a\s+href=("(?:[^"]*)"|'(?:[^']*)')\s*>([\s\S]*?)<\/a>/gi,
+      (match, qHref, labelText) => {
+        const href = qHref.slice(1, -1);
+        const token = `__A_TAG_${idx++}__`;
+
+        anchors.push({
+          token,
+          href: normalizeHref(href),
+          label: labelText
+        });
+
+        return token;
+      }
+    );
+
+    let safe = escapeHtml(raw);
+
+    anchors.forEach(a => {
+      const html = `<a href="${escapeHtml(a.href)}">${escapeHtml(a.label)}</a>`;
+      safe = safe.replace(a.token, html);
+    });
+
+    safe = safe.replace(/\{PROBLEM=(.+?)\}/g, (_, p1) =>
+      `<a href="/${escapeHtml(p1)}">[${escapeHtml(p1)}]</a>`
+    );
+
+    safe = safe.replace(/\n/g, "<br>");
+    clearMathJax(preview);
+
+    if (!safe.trim()) {
+      preview.innerHTML = "";
+      preview.classList.add("hidden");
+      label.classList.add("hidden");
+      return;
+    }
+
+    preview.innerHTML = safe;
+    preview.classList.remove("hidden");
+    label.classList.remove("hidden");
+
+    typesetMath(preview);
+  }
+
+function initialisePreview(textarea) {
+  const form = textarea.closest("form");
+  const preview = form && form.querySelector(".post-preview");
+  const label = form && form.querySelector(".preview-label");
+
+  if (!preview || !label) {
+    return;
+  }
+
+  renderPreview(textarea, preview, label);
+}
+
+document.addEventListener("input", function (event) {
+  if (!event.target.matches("form textarea")) {
+    return;
+  }
+
+  initialisePreview(event.target);
+});
+
+document.querySelectorAll("form textarea").forEach(function (textarea) {
+  initialisePreview(textarea);
+});
+});
+</script>
+
+<!-- To handle the search bar -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    function setFilterLink(linkId, newFilter) {
+        const link = document.getElementById(linkId);
+        if (!link) return;
+        const pathParts = window.location.pathname.split("/");
+        // Expect: /<section>/<entry> or /<section>/<entry>/<filter>
+        if (pathParts.length >= 3) {
+            const section = pathParts[1];
+            const entry = pathParts[2];
+            // Construct base: /tags/additive, /sources_bib/BL09, etc.
+            const baseUrl = "/" + section + "/" + entry;
+            link.href = baseUrl + "/" + newFilter;
+        }
+    }
+    setFilterLink("solvedLink", "solved");
+    setFilterLink("openLink", "open");
+    setFilterLink("yesLink", "yes");
+    setFilterLink("noLink", "no");
+});
+</script>
+
+<!-- Handle the dual view link -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const dualLink = document.getElementById("dualViewLink");
+  if (!dualLink) return;
+
+  const isInDualView = window.location.pathname.startsWith("/dual");
+  dualLink.textContent = isInDualView ? "Exit Dual View" : "Dual View";
+  dualLink.addEventListener("click", function (e) {
+    e.preventDefault();
+
+    if (isInDualView) {
+      try {
+        const leftIframe = document.getElementById("iframe-left");
+        const src = leftIframe?.src || "/";
+        let clean = src.replace(window.location.origin, "");
+        clean = clean.replace(/[?&]embed=1/, "");
+
+        window.location.href = clean;
+      } catch (err) {
+        window.location.href = "/";
+      }
+    } else {
+      const currentPath = window.location.pathname + window.location.search;
+      const rightPanelDefault = "/";
+      const hash = `#left:${encodeURIComponent(currentPath)}&right:${encodeURIComponent(rightPanelDefault)}`;
+      window.location.href = `/dual${hash}`;
+    }
+  });
+});
+</script>
+
+<!-- Redirect links and searches when in dual view mode -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  if (!window.location.pathname.startsWith("/dual")) return;
+
+  function getTargetPanel() {
+    const selected = document.querySelector('input[name="targetPanel"]:checked');
+    return selected ? selected.value : "left";
+  }
+
+  function loadInPanel(panel, path) {
+    if (!path) return;
+    const iframe = document.getElementById(`iframe-${panel}`);
+    if (!iframe) return;
+    const url = path.includes("?") ? path + "&embed=1" : path + "?embed=1";
+    iframe.src = url;
+    const inputBox = document.querySelector(`#panel-${panel} input`);
+    if (inputBox) inputBox.value = path;
+    console.log(`Loaded "${url}" into panel "${panel}"`);
+  }
+  
+  document.querySelectorAll(".dual-aware a[href^='/'], a.dual-aware[href^='/']").forEach(link => {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      const path = this.getAttribute("href");
+      loadInPanel(getTargetPanel(), path);
+    });
+  });
+
+  const idForm = document.getElementById("idsearchForm");
+  if (idForm) {
+    idForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const input = idForm.querySelector(".idsearchTerm").value.trim();
+      if (!input) return;
+
+      let path = null;
+
+      if (/^\d+$/.test(input)) {
+        path = "/go_to/" + encodeURIComponent(input);
+      } else if (/^((\d+|end)(-(\d+|end))?\s*)+(open|solved|yes|no)?$/i.test(input)) {
+        const parts = input.split(/\s+/).filter(Boolean);
+        path = "/range/" + parts.map(encodeURIComponent).join("/");
+      } else {
+        alert("Invalid input format.");
+        return;
+      }
+
+      loadInPanel(getTargetPanel(), path);
+    });
+  }
+
+  const searchForm = document.getElementById("searchForm");
+  if (searchForm) {
+    searchForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const input = searchForm.querySelector(".searchTerm").value.trim();
+      if (!input) return;
+
+      const path = "/search/" + encodeURIComponent(input);
+      loadInPanel(getTargetPanel(), path);
+    });
+  }
+});
+</script>
+
+<!-- Different menu on mobile -->
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const button = document.getElementById("mobileMenuButton");
+  const dropdown = document.getElementById("mobileDropdown");
+
+  if (button && dropdown) {
+    button.addEventListener("click", function () {
+      dropdown.classList.toggle("show");
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+        dropdown.classList.remove("show");
+      }
+    });
+  }
+});
+</script>
+
+<!-- For expanding threads -->
+
+<script>
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('#toggle-posts');
+  if (!link) return;
+  e.preventDefault(); 
+
+  const box = document.getElementById('more-posts');
+  const isHidden = box.classList.toggle('hidden');
+  const expanded = !isHidden;
+
+  link.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  box.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+
+  link.textContent = expanded
+    ? 'Show only the top five comments'
+    : `Show ${link.dataset.remaining} more comments`;
+});
+</script>
+
+
+<script>
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('.toggle-replies');
+  if (!link) return;
+  e.preventDefault();
+
+  const pid = link.dataset.postId;
+  const box = document.getElementById(`more-replies-${pid}`);
+  if (!box) return;
+
+  const isHidden = box.classList.toggle('hidden');
+  const expanded = !isHidden;
+
+  link.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+  box.setAttribute('aria-hidden', expanded ? 'false' : 'true');
+
+  link.textContent = expanded
+    ? 'Hide replies'
+    : `Show ${link.dataset.remaining} more replies`;
+});
+</script>
+
+
+<script>
+document.addEventListener("click", async function (event) {
+    const button = event.target.closest(".problem-status-option");
+    if (!button) return;
+
+    const widget = button.closest(".problem-status-widget");
+    if (!widget) return;
+
+    if (widget.dataset.canEdit !== "1") return;
+
+    const status = button.dataset.status;
+    const url = widget.dataset.setUrl;
+
+    widget.classList.add("is-saving");
+
+    const buttons = widget.querySelectorAll(".problem-status-option");
+    buttons.forEach(btn => btn.disabled = true);
+
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            credentials: "same-origin",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Requested-With": "fetch"
+            },
+            body: JSON.stringify({ status: status })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || !data.ok) {
+            throw new Error(data.error || "Could not update problem status.");
+        }
+
+        widget.dataset.currentStatus = data.status;
+
+        buttons.forEach(btn => {
+            const active = btn.dataset.status === data.status;
+            btn.classList.toggle("is-active", active);
+            btn.setAttribute("aria-checked", active ? "true" : "false");
+        });
+
+        const label = widget.querySelector(".js-problem-status-label");
+        const description = widget.querySelector(".js-problem-status-description");
+
+        if (label) label.textContent = data.label || button.dataset.label;
+        if (description) description.textContent = data.description || button.dataset.description;
+          widget.style.setProperty("--status-progress", button.dataset.progress);
+
+    } catch (err) {
+        alert(err.message || "Could not update problem status.");
+    } finally {
+        widget.classList.remove("is-saving");
+
+        if (widget.dataset.canEdit === "1") {
+            buttons.forEach(btn => btn.disabled = false);
+        }
+    }
+});
+</script>
+  
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a464809deb01f322',t:'MTc5MTI4Nzk5MQ=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

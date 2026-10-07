@@ -1,0 +1,44 @@
+\providecommand{\bysame}{\leavevmode\hbox to3em{\hrulefill}\thinspace}
+\providecommand{\MR}{\relax\ifhmode\unskip\space\fi MR }
+% \MRhref is called by the amsart/book/proc definition of \MR.
+\providecommand{\MRhref}[2]{%
+  \href{http://www.ams.org/mathscinet-getitem?mr=#1}{#2}
+}
+\providecommand{\href}[2]{#2}
+\begin{thebibliography}{1}
+
+\bibitem{erdosproblems458}
+Thomas~F. Bloom, \emph{Erd{\H{o}}s problem \#458},
+  \url{https://www.erdosproblems.com/458}, Accessed 2026-10-06.
+
+\bibitem{ErdosDB}
+Thomas~F. Bloom and Terence Tao, \emph{Erd{\H{o}}s problems database},
+  \url{https://github.com/teorth/erdosproblems}, 2025.
+
+\bibitem{BLS75}
+John Brillhart, D.~H. Lehmer, and J.~L. Selfridge, \emph{New primality criteria
+  and factorizations of $2^m\pm1$}, Mathematics of Computation \textbf{29}
+  (1975), no.~130, 620--647.
+
+\bibitem{ErGr80}
+Paul Erd{\H{o}}s and Ronald~L. Graham, \emph{Old and new problems and results
+  in combinatorial number theory}, Monographies de L'Enseignement
+  Math{\'e}matique, vol.~28, Universit{\'e} de Gen{\`e}ve, 1980.
+
+\bibitem{OeSHP2014}
+Tom{\'a}s Oliveira~e Silva, Siegfried Herzog, and Silvio Pardi, \emph{Empirical
+  verification of the even {G}oldbach conjecture and computation of prime gaps
+  up to $4\cdot10^{18}$}, Mathematics of Computation \textbf{83} (2014),
+  no.~288, 2033--2060.
+
+\bibitem{Pocklington1914}
+Henry~C. Pocklington, \emph{The determination of the prime or composite nature
+  of large numbers by {F}ermat's theorem}, Proceedings of the Cambridge
+  Philosophical Society \textbf{18} (1914), 29--30.
+
+\bibitem{SorensonWebster2017}
+Jonathan Sorenson and Jonathan Webster, \emph{Strong pseudoprimes to twelve
+  prime bases}, Mathematics of Computation \textbf{86} (2017), no.~304,
+  985--1003.
+
+\end{thebibliography}

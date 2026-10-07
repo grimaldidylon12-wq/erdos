@@ -1,0 +1,59 @@
+{
+ "certificate": {
+  "N": 10000000,
+  "near_misses": [
+   27,
+   28,
+   29,
+   30,
+   33,
+   34,
+   35,
+   36,
+   40,
+   45,
+   46,
+   47,
+   48,
+   53,
+   54,
+   59,
+   60,
+   69,
+   70,
+   108,
+   117,
+   118,
+   119,
+   120,
+   168,
+   360,
+   1078
+  ],
+  "solutions": [
+   2,
+   3,
+   4,
+   5,
+   6,
+   8,
+   10,
+   12,
+   24
+  ]
+ },
+ "created": "2026-10-06T12:39:13+00:00",
+ "engine_version": "0.1.0",
+ "frontier": 10000000.0,
+ "host": "Linux x86_64 py3.13.16",
+ "outcome": "verified_to_bound",
+ "params": {
+  "N": 10000000
+ },
+ "problem": 647,
+ "solver": "p647-tau-prefix-max",
+ "stats": {
+  "seconds": 16.65
+ },
+ "summary": "No n with 24 < n <= 10000000; all solutions up to N: [2, 3, 4, 5, 6, 8, 10, 12, 24]."
+}

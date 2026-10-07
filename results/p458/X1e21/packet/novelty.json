@@ -1,0 +1,8 @@
+{
+ "verdict": "new-frontier",
+ "our_value": 1e+21,
+ "prior_value": 1e+20,
+ "prior_source": "bhowerton, erdosproblems.com forum, 12 Jun 2026; that verification relies on prime-gap records above 4e18",
+ "explanation": "Our bound 1e+21 exceeds the largest claim found (1e+20).",
+ "needs_human_review": true
+}

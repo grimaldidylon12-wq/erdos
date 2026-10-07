@@ -1,0 +1,9 @@
+{
+ "checker": "p699-bigint-gcd",
+ "details": [
+  "every pair with n <= 60 recomputed with exact gcds",
+  "3000 random pairs with n <= 300 recomputed with exact gcds"
+ ],
+ "ok": true,
+ "seconds": 0.04899817800014716
+}

@@ -1,0 +1,9 @@
+{
+ "checker": "p647-spf-and-trial-division",
+ "details": [
+  "solutions on [2,200000] recomputed with an spf sieve: [2, 3, 4, 5, 6, 8, 10, 12, 24]",
+  "2027 values of n > 24 refuted by an explicit m with tau(m) > n+2-m"
+ ],
+ "ok": true,
+ "seconds": 0.13161744499984707
+}
